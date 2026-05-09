@@ -17,30 +17,36 @@ const GlobalStyle = () => (
 const SEED = {
   settings: {
     groupName: "Grow Together Team",
-    startMonth: "2025-02",
+    startMonth: "2026-02",
     // monthly contribution per month: { "2025-02": 100, "2025-03": 100, "2025-04": 100, "2025-05": 1000 }
-    monthlyAmounts: { "2025-02": 100, "2025-03": 100, "2025-04": 100, "2025-05": 1000 },
-    interestRate: 1,
+    monthlyAmounts: {
+    "2026-02": 100,
+    "2026-03": 100,
+    "2026-04": 100,
+    "2026-05": 1000
+  }, interestRate: 1,
     deadline: 10,
   },
   members: [
-    { id: 1, name: "Veeranna", role: "admin",  pin: "1234", joined: "2025-02", phone: "", email: "" },
-    { id: 2, name: "Anusha",   role: "member", pin: "0000", joined: "2025-02", phone: "", email: "" },
-    { id: 3, name: "Krishna",  role: "member", pin: "0000", joined: "2025-02", phone: "", email: "" },
-    { id: 4, name: "Santosh",  role: "member", pin: "0000", joined: "2025-02", phone: "", email: "" },
-    { id: 5, name: "Channa",   role: "member", pin: "0000", joined: "2025-02", phone: "", email: "" },
-    { id: 6, name: "Chandru",  role: "member", pin: "0000", joined: "2025-02", phone: "", email: "" },
-    { id: 7, name: "Ashok",    role: "member", pin: "0000", joined: "2025-02", phone: "", email: "" },
+    { id: 1, name: "Veeranna", role: "admin",  pin: "1234", joined: "2026-02", phone: "", email: "" },
+    { id: 2, name: "Anusha",   role: "member", pin: "0000", joined: "2026-02", phone: "", email: "" },
+    { id: 3, name: "Krishna",  role: "member", pin: "0000", joined: "2026-02", phone: "", email: "" },
+    { id: 4, name: "Santosh",  role: "member", pin: "0000", joined: "2026-02", phone: "", email: "" },
+    { id: 5, name: "Channa",   role: "member", pin: "0000", joined: "2026-02", phone: "", email: "" },
+    { id: 6, name: "Chandru",  role: "member", pin: "0000", joined: "2026-02", phone: "", email: "" },
+    { id: 7, name: "Ashok",    role: "member", pin: "0000", joined: "2026-02", phone: "", email: "" },
   ],
   // payments: { "memberId_YYYY-MM": amount }
   payments: {
-    "1_2025-02": 100, "2_2025-02": 100, "3_2025-02": 100, "4_2025-02": 100,
-    "5_2025-02": 100, "6_2025-02": 100, "7_2025-02": 100,
-    "1_2025-03": 100, "2_2025-03": 100, "3_2025-03": 100, "4_2025-03": 100,
-    "5_2025-03": 100, "6_2025-03": 100, "7_2025-03": 100,
-    "1_2025-04": 100, "2_2025-04": 100, "3_2025-04": 100, "4_2025-04": 100,
-    "5_2025-04": 100, "6_2025-04": 100, "7_2025-04": 100,
-  },
+  "1_2026-02": 100, "2_2026-02": 100, "3_2026-02": 100, "4_2026-02": 100,
+  "5_2026-02": 100, "6_2026-02": 100, "7_2026-02": 100,
+
+  "1_2026-03": 100, "2_2026-03": 100, "3_2026-03": 100, "4_2026-03": 100,
+  "5_2026-03": 100, "6_2026-03": 100, "7_2026-03": 100,
+
+  "1_2026-04": 100, "2_2026-04": 100, "3_2026-04": 100, "4_2026-04": 100,
+  "5_2026-04": 100, "6_2026-04": 100, "7_2026-04": 100,
+},
   loans: [],
   adjustments: [],
 };
@@ -51,6 +57,7 @@ const fmt = n => "₹" + Number(n||0).toLocaleString("en-IN");
 const monthLabel = ym => { if(!ym) return ""; const [y,m] = ym.split("-"); return new Date(y,m-1,1).toLocaleString("default",{month:"long",year:"numeric"}); };
 const initials = name => name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();
 const nextId = arr => arr.length ? Math.max(...arr.map(x=>x.id)) + 1 : 1;
+const USER_KEY = "gtt-current-user";
 
 function getMonthsBetween(start, end) {
   const months = [];
@@ -68,7 +75,10 @@ export default function App() {
   const [db, setDb] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [user, setUser] = useState(null);
+ const [user, setUser] = useState(() => {
+  const savedUser = localStorage.getItem(USER_KEY);
+  return savedUser ? JSON.parse(savedUser) : null;
+});
   const [tab, setTab] = useState("home");
   const [modal, setModal] = useState(null); // { type, data }
   const [toast, setToast] = useState(null);
@@ -129,7 +139,10 @@ if (result) {
           {toast.msg}
         </div>
       )}
-      <TopBar user={user} saving={saving} onLogout={()=>setUser(null)} />
+      <TopBar user={user} saving={saving} onLogout={() => {
+  localStorage.removeItem("gtt-current-user");
+  setUser(null);
+}} />
       <div style={{flex:1,overflowY:"auto",paddingBottom:80}}>
         {tab==="home"    && <HomeScreen db={db} user={user} isAdmin={isAdmin} saveData={saveData} showToast={showToast} openModal={(t,d)=>setModal({type:t,data:d})} />}
         {tab==="members" && <MembersScreen db={db} user={user} isAdmin={isAdmin} openModal={(t,d)=>setModal({type:t,data:d})} />}
@@ -180,7 +193,9 @@ function LoginScreen({db, onLogin}) {
   const login = () => {
     const m = db.members.find(x=>x.id===parseInt(sel));
     if (!m || m.pin !== pin) { setErr("Wrong PIN. Try again."); return; }
-    setErr(""); onLogin(m);
+    setErr("");
+localStorage.setItem("gtt-current-user", JSON.stringify(m));
+onLogin(m);
   };
   return (
     <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#061510,#0f3d25)",display:"flex",flexDirection:"column",justifyContent:"center",padding:"30px 24px"}}>
@@ -201,7 +216,7 @@ function LoginScreen({db, onLogin}) {
         <input type="password" value={pin} onChange={e=>setPin(e.target.value)} maxLength={4} inputMode="numeric" placeholder="••••" style={inputStyle} onKeyDown={e=>e.key==="Enter"&&login()} />
         {err && <div style={{color:"#ff6b6b",fontSize:12,marginBottom:8,fontWeight:600}}>{err}</div>}
         <button onClick={login} style={btnStyle("#00d97e")}>Sign In →</button>
-        <div style={{fontSize:11,color:"#3d7a54",textAlign:"center",marginTop:10}}>Admin PIN: 1234 · Members PIN: 0000</div>
+        {/* <div style={{fontSize:11,color:"#3d7a54",textAlign:"center",marginTop:10}}>Admin PIN: 1234 · Members PIN: 0000</div> */}
       </div>
     </div>
   );
