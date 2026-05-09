@@ -78,13 +78,14 @@ export default function App() {
 
   const loadData = useCallback(async () => {
     try {
-      const result = await window.storage.get(STORAGE_KEY);
-      if (result && result.value) {
-        setDb(JSON.parse(result.value));
-      } else {
-        setDb(SEED);
-        await window.storage.set(STORAGE_KEY, JSON.stringify(SEED));
-      }
+      const result = localStorage.getItem(STORAGE_KEY);
+
+if (result) {
+  setDb(JSON.parse(result));
+} else {
+  setDb(SEED);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED));
+}
     } catch {
       // fallback to seed if storage fails
       setDb(SEED);
@@ -96,7 +97,7 @@ export default function App() {
     setSaving(true);
     setDb(newDb);
     try {
-      await window.storage.set(STORAGE_KEY, JSON.stringify(newDb));
+     localStorage.setItem(STORAGE_KEY, JSON.stringify(newDb));
     } catch { /* silent */ }
     setSaving(false);
   }, []);
